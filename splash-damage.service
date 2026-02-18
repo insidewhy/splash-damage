@@ -1,0 +1,13 @@
+[Unit]
+Description=splash-damage keyboard remapper
+After=graphical-session.target
+
+[Service]
+Type=simple
+Environment=RUST_LOG=info
+ExecStart=%h/.local/bin/splash-damage
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

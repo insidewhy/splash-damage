@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:wiki.hypr.land)",
+      "WebFetch(domain:manpages.debian.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cargo init:*)",
+      "WebFetch(domain:docs.rs)",
+      "Bash(cargo build:*)",
+      "WebFetch(domain:invent.kde.org)",
+      "WebFetch(domain:discuss.kde.org)",
+      "WebFetch(domain:wiki.archlinux.org)",
+      "WebFetch(domain:venam.net)",
+      "WebFetch(domain:espanso.org)",
+      "WebFetch(domain:bbs.archlinux.org)",
+      "WebFetch(domain:codedbearder.com)"
+    ]
+  }
+}
