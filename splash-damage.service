@@ -1,6 +1,7 @@
 [Unit]
 Description=splash-damage keyboard remapper
 After=graphical-session.target
+BindsTo=graphical-session.target
 
 [Service]
 Type=simple
