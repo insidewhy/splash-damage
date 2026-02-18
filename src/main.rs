@@ -39,6 +39,7 @@ async fn main() -> anyhow::Result<()> {
         device::grab_device(&mut dev)?;
 
         let mut virt = virtual_device::create_virtual_keyboard(&dev)?;
+        virtual_device::release_all_modifiers(&mut virt)?;
 
         let handle = tokio::spawn(async move {
             let mut remapper = remap::Remapper::new(rules, aw);
