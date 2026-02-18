@@ -11,9 +11,7 @@ pub fn find_keyboards() -> Vec<(PathBuf, Device)> {
                 return false;
             }
 
-            let is_keyboard = device
-                .supported_events()
-                .contains(EventType::KEY)
+            let is_keyboard = device.supported_events().contains(EventType::KEY)
                 && device.supported_keys().is_some_and(|keys| {
                     keys.contains(evdev::Key::KEY_A) && keys.contains(evdev::Key::KEY_Z)
                 });
@@ -28,9 +26,6 @@ pub fn find_keyboards() -> Vec<(PathBuf, Device)> {
 
 pub fn grab_device(device: &mut Device) -> std::io::Result<()> {
     device.grab()?;
-    info!(
-        "grabbed device: {}",
-        device.name().unwrap_or("unknown")
-    );
+    info!("grabbed device: {}", device.name().unwrap_or("unknown"));
     Ok(())
 }

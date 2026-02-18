@@ -3,8 +3,7 @@ use evdev::{AttributeSet, Device, InputEvent, Key};
 use tracing::info;
 
 pub fn create_virtual_keyboard(source: &Device) -> std::io::Result<VirtualDevice> {
-    let mut builder = VirtualDeviceBuilder::new()?
-        .name("splash-damage virtual keyboard");
+    let mut builder = VirtualDeviceBuilder::new()?.name("splash-damage virtual keyboard");
 
     if let Some(keys) = source.supported_keys() {
         let mut key_set = AttributeSet::<Key>::new();

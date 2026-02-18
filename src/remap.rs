@@ -67,7 +67,11 @@ impl Remapper {
                 continue;
             }
 
-            let all_modifiers_held = rule.from.modifiers.iter().all(|m| self.is_modifier_held(*m));
+            let all_modifiers_held = rule
+                .from
+                .modifiers
+                .iter()
+                .all(|m| self.is_modifier_held(*m));
             if !all_modifiers_held {
                 continue;
             }
@@ -107,9 +111,11 @@ impl Remapper {
         if value == KEY_PRESS {
             // Release the "from" modifiers that aren't in "to"
             for from_mod in &rule.from.modifiers {
-                let needed_in_to = rule.to.modifiers.iter().any(|to_mod| {
-                    self.same_modifier_group(*from_mod, *to_mod)
-                });
+                let needed_in_to = rule
+                    .to
+                    .modifiers
+                    .iter()
+                    .any(|to_mod| self.same_modifier_group(*from_mod, *to_mod));
                 if !needed_in_to {
                     events.push(key_event(*from_mod, KEY_RELEASE));
                 }
@@ -117,9 +123,11 @@ impl Remapper {
 
             // Press the "to" modifiers that aren't already held from "from"
             for to_mod in &rule.to.modifiers {
-                let already_from = rule.from.modifiers.iter().any(|from_mod| {
-                    self.same_modifier_group(*from_mod, *to_mod)
-                });
+                let already_from = rule
+                    .from
+                    .modifiers
+                    .iter()
+                    .any(|from_mod| self.same_modifier_group(*from_mod, *to_mod));
                 if !already_from {
                     events.push(key_event(*to_mod, KEY_PRESS));
                 }
@@ -131,18 +139,22 @@ impl Remapper {
 
             // Release "to" modifiers we injected, re-press "from" modifiers
             for to_mod in &rule.to.modifiers {
-                let was_from = rule.from.modifiers.iter().any(|from_mod| {
-                    self.same_modifier_group(*from_mod, *to_mod)
-                });
+                let was_from = rule
+                    .from
+                    .modifiers
+                    .iter()
+                    .any(|from_mod| self.same_modifier_group(*from_mod, *to_mod));
                 if !was_from {
                     events.push(key_event(*to_mod, KEY_RELEASE));
                 }
             }
 
             for from_mod in &rule.from.modifiers {
-                let is_to = rule.to.modifiers.iter().any(|to_mod| {
-                    self.same_modifier_group(*from_mod, *to_mod)
-                });
+                let is_to = rule
+                    .to
+                    .modifiers
+                    .iter()
+                    .any(|to_mod| self.same_modifier_group(*from_mod, *to_mod));
                 if !is_to {
                     events.push(key_event(*from_mod, KEY_PRESS));
                 }

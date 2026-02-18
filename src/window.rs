@@ -35,10 +35,7 @@ trait KWinScripting {
     fn load_script(&self, path: &str) -> zbus::Result<i32>;
 }
 
-#[proxy(
-    interface = "org.kde.kwin.Script",
-    default_service = "org.kde.KWin"
-)]
+#[proxy(interface = "org.kde.kwin.Script", default_service = "org.kde.KWin")]
 trait KWinScript {
     #[zbus(name = "run")]
     fn run(&self) -> zbus::Result<()>;
@@ -68,10 +65,7 @@ impl ActiveWindowService {
         *state = Some(ActiveWindow {
             resource_class: resource_class.to_string(),
         });
-        info!(
-            resource_class,
-            caption, "active window changed"
-        );
+        info!(resource_class, caption, "active window changed");
     }
 }
 
@@ -109,9 +103,7 @@ impl WindowWatcher {
     }
 }
 
-pub async fn start_window_watcher(
-    state: SharedActiveWindow,
-) -> anyhow::Result<WindowWatcher> {
+pub async fn start_window_watcher(state: SharedActiveWindow) -> anyhow::Result<WindowWatcher> {
     let bus_addr = find_session_bus_address()?;
     info!("connecting to session bus at {bus_addr}");
 
@@ -124,7 +116,9 @@ pub async fn start_window_watcher(
         .at("/active_window", ActiveWindowService { state })
         .await?;
 
-    session.request_name("com.splashdamage.ActiveWindow").await?;
+    session
+        .request_name("com.splashdamage.ActiveWindow")
+        .await?;
 
     info!("registered D-Bus service com.splashdamage.ActiveWindow");
 
@@ -145,7 +139,8 @@ pub async fn start_window_watcher(
         }
     }
 
-    let script_id = script_id.ok_or_else(|| anyhow::anyhow!("KWin not available after 30 attempts"))?;
+    let script_id =
+        script_id.ok_or_else(|| anyhow::anyhow!("KWin not available after 30 attempts"))?;
     info!(script_id, "loaded kwin script");
 
     Ok(WindowWatcher {
