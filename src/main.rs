@@ -18,8 +18,11 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or_else(|| default_config_path());
 
     info!("loading config from {}", config_path.display());
-    let rules = config::load_config(&config_path)?;
-    info!("loaded {} remap rules", rules.len());
+    let loaded = config::load_config(&config_path)?;
+    info!("loaded {} remap rules", loaded.rules.len());
+    if loaded.copilot_as_meta {
+        info!("copilot_as_meta enabled");
+    }
 
     let active_window = window::shared_active_window();
 
@@ -33,7 +36,8 @@ async fn main() -> anyhow::Result<()> {
     let mut handles = Vec::new();
 
     for (path, mut dev) in keyboards {
-        let rules = rules.clone();
+        let rules = loaded.rules.clone();
+        let copilot_as_meta = loaded.copilot_as_meta;
         let aw = active_window.clone();
 
         device::grab_device(&mut dev)?;
@@ -42,7 +46,7 @@ async fn main() -> anyhow::Result<()> {
         virtual_device::release_all_modifiers(&mut virt)?;
 
         let handle = tokio::spawn(async move {
-            let mut remapper = remap::Remapper::new(rules, aw);
+            let mut remapper = remap::Remapper::new(rules, aw, copilot_as_meta);
             let mut stream = dev.into_event_stream().unwrap();
 
             loop {

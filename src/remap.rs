@@ -18,14 +18,25 @@ pub struct Remapper {
     rules: Vec<RemapRule>,
     active_window: SharedActiveWindow,
     pressed_keys: HashSet<Key>,
+    copilot_as_meta: bool,
+    copilot_held: bool,
+    /// Shift press event buffered while waiting to see if Assistant follows
+    pending_shift: Option<InputEvent>,
 }
 
 impl Remapper {
-    pub fn new(rules: Vec<RemapRule>, active_window: SharedActiveWindow) -> Self {
+    pub fn new(
+        rules: Vec<RemapRule>,
+        active_window: SharedActiveWindow,
+        copilot_as_meta: bool,
+    ) -> Self {
         Self {
             rules,
             active_window,
             pressed_keys: HashSet::new(),
+            copilot_as_meta,
+            copilot_held: false,
+            pending_shift: None,
         }
     }
 
@@ -44,13 +55,85 @@ impl Remapper {
             KEY_RELEASE => {
                 self.pressed_keys.remove(&key);
             }
-            _ => return vec![event], // repeat events pass through
+            _ => {
+                if self.copilot_as_meta && self.copilot_held && key == Key::KEY_F23 {
+                    return vec![];
+                }
+                if self.copilot_as_meta && self.pending_shift.is_some() {
+                    if matches!(key, Key::KEY_LEFTSHIFT | Key::KEY_RIGHTSHIFT) {
+                        return vec![];
+                    }
+                }
+                return vec![event];
+            }
+        }
+
+        if self.copilot_as_meta {
+            if let Some(events) = self.handle_copilot(key, value) {
+                return events;
+            }
         }
 
         if let Some(rule) = self.find_matching_rule(key) {
             self.apply_remap(&rule, key, value)
         } else {
             vec![event]
+        }
+    }
+
+    fn handle_copilot(&mut self, key: Key, value: i32) -> Option<Vec<InputEvent>> {
+        // When Meta is held and Shift is pressed, buffer it
+        if matches!(key, Key::KEY_LEFTSHIFT | Key::KEY_RIGHTSHIFT)
+            && value == KEY_PRESS
+            && self.is_modifier_held(Key::KEY_LEFTMETA)
+            && !self.copilot_held
+        {
+            self.pending_shift = Some(InputEvent::new(EventType::KEY, key.code(), value));
+            return Some(vec![]);
+        }
+
+        // Assistant arrives while Shift is buffered: it's the Copilot key
+        if key == Key::KEY_F23 && value == KEY_PRESS && self.pending_shift.is_some() {
+            self.pending_shift = None;
+            self.copilot_held = true;
+            self.pressed_keys.remove(&Key::KEY_LEFTSHIFT);
+            self.pressed_keys.remove(&Key::KEY_RIGHTSHIFT);
+            self.pressed_keys.remove(&Key::KEY_F23);
+            return Some(vec![]);
+        }
+
+        // Any other key while Shift is buffered: flush the buffered Shift first
+        if let Some(shift_event) = self.pending_shift.take() {
+            let mut events = vec![shift_event, syn_event()];
+            if let Some(mut more) = self.process_non_copilot(key, value) {
+                events.append(&mut more);
+            }
+            return Some(events);
+        }
+
+        if key == Key::KEY_F23 && value == KEY_RELEASE && self.copilot_held {
+            self.copilot_held = false;
+            return Some(vec![]);
+        }
+
+        // Suppress Shift and Assistant events while Copilot is held
+        if self.copilot_held
+            && matches!(key, Key::KEY_LEFTSHIFT | Key::KEY_RIGHTSHIFT | Key::KEY_F23)
+        {
+            return Some(vec![]);
+        }
+
+        None
+    }
+
+    fn process_non_copilot(&mut self, key: Key, value: i32) -> Option<Vec<InputEvent>> {
+        if let Some(rule) = self.find_matching_rule(key) {
+            Some(self.apply_remap(&rule, key, value))
+        } else {
+            Some(vec![
+                InputEvent::new(EventType::KEY, key.code(), value),
+                syn_event(),
+            ])
         }
     }
 

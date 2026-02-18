@@ -5,8 +5,15 @@ use std::path::Path;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(default)]
+    pub copilot_as_meta: bool,
     #[serde(rename = "remap")]
     pub remaps: Vec<RemapEntry>,
+}
+
+pub struct LoadedConfig {
+    pub rules: Vec<RemapRule>,
+    pub copilot_as_meta: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -30,11 +37,11 @@ pub struct RemapRule {
     pub exclude: Vec<String>,
 }
 
-pub fn load_config(path: &Path) -> anyhow::Result<Vec<RemapRule>> {
+pub fn load_config(path: &Path) -> anyhow::Result<LoadedConfig> {
     let content = std::fs::read_to_string(path)?;
     let config: Config = toml::from_str(&content)?;
 
-    config
+    let rules = config
         .remaps
         .into_iter()
         .map(|entry| {
@@ -46,7 +53,12 @@ pub fn load_config(path: &Path) -> anyhow::Result<Vec<RemapRule>> {
                 exclude: entry.exclude,
             })
         })
-        .collect()
+        .collect::<anyhow::Result<Vec<_>>>()?;
+
+    Ok(LoadedConfig {
+        rules,
+        copilot_as_meta: config.copilot_as_meta,
+    })
 }
 
 fn parse_key_combo(s: &str) -> anyhow::Result<KeyCombo> {
@@ -147,5 +159,17 @@ static KEYNAME_MAP: std::sync::LazyLock<HashMap<&'static str, Key>> =
         m.insert("f10", Key::KEY_F10);
         m.insert("f11", Key::KEY_F11);
         m.insert("f12", Key::KEY_F12);
+        m.insert("f13", Key::KEY_F13);
+        m.insert("f14", Key::KEY_F14);
+        m.insert("f15", Key::KEY_F15);
+        m.insert("f16", Key::KEY_F16);
+        m.insert("f17", Key::KEY_F17);
+        m.insert("f18", Key::KEY_F18);
+        m.insert("f19", Key::KEY_F19);
+        m.insert("f20", Key::KEY_F20);
+        m.insert("f21", Key::KEY_F21);
+        m.insert("f22", Key::KEY_F22);
+        m.insert("f23", Key::KEY_F23);
+        m.insert("f24", Key::KEY_F24);
         m
     });

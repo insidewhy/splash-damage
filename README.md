@@ -39,6 +39,8 @@ make install
 Default config location: `~/.config/splash-damage/config.toml`
 
 ```toml
+copilot_as_meta = true
+
 [[remap]]
 from = "super+c"
 to = "ctrl+c"
@@ -50,6 +52,10 @@ to = "ctrl+v"
 exclude = ["kitty"]
 ```
 
+### Options
+
+- `copilot_as_meta` - When `true`, the Copilot key (which sends Super+Shift+F23) is treated as plain Meta/Super by suppressing the Shift and F23 components. This lets you use the Copilot key with your existing Super+key remaps. Note: Shift+Copilot cannot be distinguished from Copilot alone, since the keyboard firmware already includes Shift in the Copilot scancode. Use Shift+Super instead if you need that combination.
+
 Each `[[remap]]` entry defines:
 - `from` - the key combination to intercept
 - `to` - the key combination to emit instead
@@ -59,7 +65,7 @@ Each `[[remap]]` entry defines:
 
 **Modifiers:** `ctrl`, `shift`, `alt`, `super` (also `meta`, `cmd`, `control`)
 
-**Keys:** `a`-`z`, `0`-`9`, `space`, `enter`, `tab`, `escape`, `backspace`, `delete`, `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `f1`-`f12`
+**Keys:** `a`-`z`, `0`-`9`, `space`, `enter`, `tab`, `escape`, `backspace`, `delete`, `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `f1`-`f24`
 
 ### Finding window class names
 
