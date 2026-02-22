@@ -43,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
         device::grab_device(&mut dev)?;
 
         let mut virt = virtual_device::create_virtual_keyboard(&dev)?;
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
         virtual_device::release_all_modifiers(&mut virt)?;
 
         let handle = tokio::spawn(async move {
