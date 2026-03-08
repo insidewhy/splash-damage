@@ -1,8 +1,7 @@
-use evdev::{EventType, InputEvent, Key};
-use std::collections::HashSet;
-
 use crate::config::RemapRule;
 use crate::window::SharedActiveWindow;
+use evdev::{EventType, InputEvent, Key};
+use std::collections::HashSet;
 
 const KEY_PRESS: i32 = 1;
 const KEY_RELEASE: i32 = 0;
@@ -157,6 +156,16 @@ impl Remapper {
                 .all(|m| self.is_modifier_held(*m));
             if !all_modifiers_held {
                 continue;
+            }
+
+            if !rule.include.is_empty() {
+                let included = rule
+                    .include
+                    .iter()
+                    .any(|inc| window_class.eq_ignore_ascii_case(inc));
+                if !included {
+                    continue;
+                }
             }
 
             let excluded = rule

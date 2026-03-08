@@ -59,13 +59,18 @@ exclude = ["kitty"]
 Each `[[remap]]` entry defines:
 - `from` - the key combination to intercept
 - `to` - the key combination to emit instead
-- `exclude` - list of window classes where the remap should not apply (matched against the active window's `resourceClass`)
+- `include` - list of window classes where the remap should apply (if empty, applies everywhere)
+- `exclude` - list of window classes where the remap should not apply
+
+Both `include` and `exclude` match against the active window's `resourceClass`. If both are specified, `include` is checked first.
 
 ### Supported keys
 
 **Modifiers:** `ctrl`, `shift`, `alt`, `super` (also `meta`, `cmd`, `control`)
 
-**Keys:** `a`-`z`, `0`-`9`, `space`, `enter`, `tab`, `escape`, `backspace`, `delete`, `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `f1`-`f24`
+**Keys:** `a`-`z`, `0`-`9`, `f1`-`f24`, `space`, `enter`, `tab`, `escape`/`esc`, `backspace`, `delete`, `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `.`, `,`, `/`, `;`, `'`, `[`, `]`, `\`, `-`, `=`, `` ` ``
+
+For shifted symbols like `>`, use the base key with shift: `ctrl+shift+.`
 
 ### Finding window class names
 

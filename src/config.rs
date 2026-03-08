@@ -21,6 +21,8 @@ pub struct RemapEntry {
     pub from: String,
     pub to: String,
     #[serde(default)]
+    pub include: Vec<String>,
+    #[serde(default)]
     pub exclude: Vec<String>,
 }
 
@@ -34,6 +36,7 @@ pub struct KeyCombo {
 pub struct RemapRule {
     pub from: KeyCombo,
     pub to: KeyCombo,
+    pub include: Vec<String>,
     pub exclude: Vec<String>,
 }
 
@@ -50,6 +53,7 @@ pub fn load_config(path: &Path) -> anyhow::Result<LoadedConfig> {
             Ok(RemapRule {
                 from,
                 to,
+                include: entry.include,
                 exclude: entry.exclude,
             })
         })
@@ -82,11 +86,15 @@ fn parse_modifier(s: &str) -> anyhow::Result<Key> {
         "shift" => Ok(Key::KEY_LEFTSHIFT),
         "alt" => Ok(Key::KEY_LEFTALT),
         "super" | "meta" | "cmd" => Ok(Key::KEY_LEFTMETA),
+        "capslock" => Ok(Key::KEY_CAPSLOCK),
         other => anyhow::bail!("unknown modifier: {other}"),
     }
 }
 
 fn parse_key(s: &str) -> anyhow::Result<Key> {
+    if let Ok(modifier) = parse_modifier(s) {
+        return Ok(modifier);
+    }
     KEYNAME_MAP
         .get(s.to_lowercase().as_str())
         .copied()
@@ -132,6 +140,27 @@ static KEYNAME_MAP: std::sync::LazyLock<HashMap<&'static str, Key>> =
         m.insert("7", Key::KEY_7);
         m.insert("8", Key::KEY_8);
         m.insert("9", Key::KEY_9);
+        m.insert("capslock", Key::KEY_CAPSLOCK);
+        m.insert(".", Key::KEY_DOT);
+        m.insert("dot", Key::KEY_DOT);
+        m.insert(",", Key::KEY_COMMA);
+        m.insert("comma", Key::KEY_COMMA);
+        m.insert("/", Key::KEY_SLASH);
+        m.insert("slash", Key::KEY_SLASH);
+        m.insert(";", Key::KEY_SEMICOLON);
+        m.insert("semicolon", Key::KEY_SEMICOLON);
+        m.insert("'", Key::KEY_APOSTROPHE);
+        m.insert("apostrophe", Key::KEY_APOSTROPHE);
+        m.insert("[", Key::KEY_LEFTBRACE);
+        m.insert("]", Key::KEY_RIGHTBRACE);
+        m.insert("\\", Key::KEY_BACKSLASH);
+        m.insert("backslash", Key::KEY_BACKSLASH);
+        m.insert("-", Key::KEY_MINUS);
+        m.insert("minus", Key::KEY_MINUS);
+        m.insert("=", Key::KEY_EQUAL);
+        m.insert("equal", Key::KEY_EQUAL);
+        m.insert("`", Key::KEY_GRAVE);
+        m.insert("grave", Key::KEY_GRAVE);
         m.insert("space", Key::KEY_SPACE);
         m.insert("enter", Key::KEY_ENTER);
         m.insert("tab", Key::KEY_TAB);
