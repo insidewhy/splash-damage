@@ -40,10 +40,12 @@ async fn main() -> anyhow::Result<()> {
         let copilot_as_meta = loaded.copilot_as_meta;
         let aw = active_window.clone();
 
+        device::release_held_keys(&mut dev)?;
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
         device::grab_device(&mut dev)?;
 
         let mut virt = virtual_device::create_virtual_keyboard(&dev)?;
-        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         virtual_device::release_all_modifiers(&mut virt)?;
 
         let handle = tokio::spawn(async move {

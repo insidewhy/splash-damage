@@ -1,4 +1,4 @@
-use evdev::{Device, EventType};
+use evdev::{Device, EventType, InputEvent};
 use std::path::PathBuf;
 use tracing::info;
 
@@ -22,6 +22,23 @@ pub fn find_keyboards() -> Vec<(PathBuf, Device)> {
             is_keyboard
         })
         .collect()
+}
+
+pub fn release_held_keys(device: &mut Device) -> std::io::Result<()> {
+    let pressed = device.get_key_state()?;
+    let mut events: Vec<InputEvent> = Vec::new();
+    for key in pressed.iter() {
+        events.push(InputEvent::new(EventType::KEY, key.code(), 0));
+    }
+    if !events.is_empty() {
+        events.push(InputEvent::new(EventType::SYNCHRONIZATION, 0, 0));
+        info!(
+            "releasing {} held keys on physical device before grab",
+            events.len() - 1
+        );
+        device.send_events(&events)?;
+    }
+    Ok(())
 }
 
 pub fn grab_device(device: &mut Device) -> std::io::Result<()> {
